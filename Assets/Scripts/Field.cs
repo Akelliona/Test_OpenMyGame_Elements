@@ -39,6 +39,10 @@ public class Field : MonoBehaviour
                         break;
                 }
             }
+
+            while(view.Last().Count() < width) {
+                view.Last().Add(null);
+            }
         }
     }
 
@@ -66,5 +70,66 @@ public class Field : MonoBehaviour
     GameObject GetElementPrefab(ElementType type)
     {
         return elementPrefabs.Find(x => x.GetComponent<Element>().Type == type);
+    }
+
+    public void MoveRight(Element element)
+    {
+        var pos = element.pos;
+        var newPos = pos + Vector2Int.right;
+
+        if (newPos.x < width) {
+            var other = view[newPos.y][newPos.x];
+
+            Move(element, newPos);
+            Move(other, pos);
+        }
+    }
+
+    public void MoveLeft(Element element)
+    {
+        var pos = element.pos;
+        var newPos = pos + Vector2Int.left;
+
+        if (newPos.x >= 0) {
+            var other = view[newPos.y][newPos.x];
+
+            Move(element, newPos);
+            Move(other, pos);
+        }
+    }
+
+    public void MoveUp(Element element)
+    {
+        var pos = element.pos;
+        var newPos = pos + Vector2Int.up;
+
+        if (view.Count > newPos.y && view[newPos.y].Count > newPos.x && view[newPos.y][newPos.x] != null) {
+            var other = view[newPos.y][newPos.x];
+
+            Move(element, newPos);
+            Move(other, pos);
+        }
+    }
+
+    public void MoveDown(Element element)
+    {
+        var pos = element.pos;
+        var newPos = pos + Vector2Int.down;
+
+        if (newPos.y >= 0 && view[newPos.y].Count > newPos.x) {
+            var other = view[newPos.y][newPos.x];
+
+            Move(element, newPos);
+            Move(other, pos);
+        }
+    }
+
+    void Move(Element e, Vector2Int pos)
+    {
+        view[pos.y][pos.x] = e;
+        if (e != null) {
+            e.transform.position = GetPosFromIndex(pos.x, pos.y);
+            e.UpdatePos(pos.x, pos.y);
+        }
     }
 }
