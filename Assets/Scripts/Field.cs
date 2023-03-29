@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +14,38 @@ public enum GameEventType
     MoveEnd
 }
 
+class ElementAnimationController
+{
+    int waitAnimationEnd = 0;
+    void OnAnimationEnd()
+    {
+        --waitAnimationEnd;
+    }
+
+    public void MakeDestroyAnimation(Element e)
+    {
+        ++waitAnimationEnd;
+        e.onDestroyAnimationEnd += OnAnimationEnd;
+        e.Destroy();
+    }
+
+    public void MakeMoveAnimation(Element e, Vector3 end)
+    {
+        ++waitAnimationEnd;
+        e.transform.DOMove(end, 1f).OnComplete(() => {
+            OnAnimationEnd();
+        });
+    }
+
+    public IEnumerator WaitForAnimationEnd()
+    {
+        while (waitAnimationEnd > 0) {
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+}
+
+
 public class Field : MonoBehaviour
 {
     [SerializeField]
@@ -25,6 +58,8 @@ public class Field : MonoBehaviour
     int height = 0;
 
     Action<GameEventType> onEvent;
+
+    ElementAnimationController allAnimationController = new ElementAnimationController();
     public void CreateLevelFrom(string[] level)
     {
         height = level.Length;
@@ -144,7 +179,7 @@ public class Field : MonoBehaviour
     {
         view[pos.y][pos.x] = e;
         if (e != null) {
-            e.transform.position = GetPosFromIndex(pos.x, pos.y);
+            allAnimationController.MakeMoveAnimation(e, GetPosFromIndex(pos.x, pos.y));
             e.UpdatePos(pos.x, pos.y);
         }
     }
@@ -163,11 +198,11 @@ public class Field : MonoBehaviour
     }
 
     IEnumerator Normalize()
-    {
+    {       
         do {
-            yield return new WaitForSeconds(1f);
+            yield return allAnimationController.WaitForAnimationEnd();
             FallDown();
-            yield return new WaitForSeconds(1f);
+            yield return allAnimationController.WaitForAnimationEnd();
         } while (Blow());
 
         onEvent?.Invoke(GameEventType.MoveEnd);
@@ -203,6 +238,7 @@ public class Field : MonoBehaviour
 
     bool Blow()
     {
+        const float minAmountInRowForBlow = 3;
         List<Element> forBlow = new List<Element>();
 
         for (int y = 0; y < view.Count; ++y) {
@@ -225,7 +261,7 @@ public class Field : MonoBehaviour
                 }
 
                 if (view[y][x] == null || view[y][x].Type != view[y][startIdx].Type) {
-                    if (sameInLine >= 3) {
+                    if (sameInLine >= minAmountInRowForBlow) {
                         for (int k = startIdx; k < startIdx + sameInLine; ++k) {
                             forBlow.Add(view[y][k]);
                         }
@@ -241,7 +277,7 @@ public class Field : MonoBehaviour
                 }
             }
 
-            if (sameInLine >= 3) {
+            if (sameInLine >= minAmountInRowForBlow) {
                 for (int k = startIdx; k < startIdx + sameInLine; ++k) {
                     forBlow.Add(view[y][k]);
                 }
@@ -258,7 +294,7 @@ public class Field : MonoBehaviour
                 }
 
                 if (view[y][x].Type != view[startIdx][x].Type) {
-                    if (sameInLine >= 3) {
+                    if (sameInLine >= minAmountInRowForBlow) {
                         for (int k = startIdx; k < startIdx + sameInLine; ++k) {
                             forBlow.Add(view[k][x]);
                         }
@@ -275,7 +311,7 @@ public class Field : MonoBehaviour
 
             }
 
-            if (sameInLine >= 3) {
+            if (sameInLine >= minAmountInRowForBlow) {
                 for (int k = startIdx; k < startIdx + sameInLine; ++k) {
                     if (!forBlow.Contains(view[k][x])) {
                         forBlow.Add(view[k][x]);
@@ -286,7 +322,7 @@ public class Field : MonoBehaviour
 
         foreach(var e in forBlow) {
             var pos = e.pos;
-            Destroy(e.gameObject);
+            allAnimationController.MakeDestroyAnimation(e);
             view[pos.y][pos.x] = null;
         }
 
