@@ -46,18 +46,20 @@ abstract class Swipe : ISwipe
     }
     protected void RegisterSwipe(Vector3 endPos)
     {
-        var delta = endPos - target.transform.position;
-        delta.z = 0;
+        if (target != null) {
+            var delta = endPos - target.transform.position;
+            delta.z = 0;
 
-        if (target != null && delta.sqrMagnitude > minDistanceToRegisterSwipe * minDistanceToRegisterSwipe) {
-            ISwipe.Type type = ISwipe.Type.Right;
-            if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y)) {
-                type = delta.x > 0 ? ISwipe.Type.Right : ISwipe.Type.Left;
-            } else {
-                type = delta.y > 0 ? ISwipe.Type.Top : ISwipe.Type.Bottom;
+            if (delta.sqrMagnitude > minDistanceToRegisterSwipe * minDistanceToRegisterSwipe) {
+                ISwipe.Type type = ISwipe.Type.Right;
+                if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y)) {
+                    type = delta.x > 0 ? ISwipe.Type.Right : ISwipe.Type.Left;
+                } else {
+                    type = delta.y > 0 ? ISwipe.Type.Top : ISwipe.Type.Bottom;
+                }
+
+                swipeRegistered[(int)type] = true;
             }
-
-            swipeRegistered[(int)type] = true;
         }
     }
 }
