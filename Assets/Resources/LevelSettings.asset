@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2d25ac520a00b0419ba2cc79fe65074, type: 3}
   m_Name: LevelSettings
   m_EditorClassIdentifier: 
-  behaviour: 0
+  behaviour: 1
   levels:
   - minLevel: 1
     maxLevel: 3
     levelPath: Levels_1_3
   defaultLevel:
-  - '"1 0 1"'
-  - '"1"'
+  - 1 0 1
+  - 1
