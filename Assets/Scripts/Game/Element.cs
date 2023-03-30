@@ -30,7 +30,7 @@ public class Element : MonoBehaviour
     public void UpdatePos(int i, int j)
     {
         pos = new Vector2Int(i, j);
-        GetComponent<SpriteRenderer>().sortingOrder = i * 10 + j; 
+        GetComponent<SpriteRenderer>().sortingOrder = j * 10 + i; 
     }
 
     public void Destroy()
