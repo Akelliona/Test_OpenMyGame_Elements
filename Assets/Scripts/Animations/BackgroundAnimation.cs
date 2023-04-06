@@ -1,7 +1,6 @@
-using System.Collections;
+using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
 
 public class BackgroundAnimation : MonoBehaviour
 {
@@ -11,9 +10,9 @@ public class BackgroundAnimation : MonoBehaviour
     float maxBalloonTimeFly;
 
     [SerializeField]
-    Vector3 leftBottomCorner;
+    float minRelativeHeight;
     [SerializeField]
-    Vector3 rightUpCornerCorner;
+    float maxRelativeHeight;
 
     [SerializeField]
     List<GameObject> balloonVariants;
@@ -34,7 +33,7 @@ public class BackgroundAnimation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Time.time > timeLastGenerateBalloon + minDeltaForGeneration && balloons.Count < maxBalloonsOnField) {
+        if (Time.time > timeLastGenerateBalloon + minDeltaForGeneration && balloons.Count < maxBalloonsOnField) {
             timeLastGenerateBalloon = Time.time;
             GenerateBalloon();
         }
@@ -43,17 +42,19 @@ public class BackgroundAnimation : MonoBehaviour
     void GenerateBalloon()
     {
         var randomVariant = balloonVariants[Random.Range(0, balloonVariants.Count)];
-        var height = Random.Range(leftBottomCorner.y, rightUpCornerCorner.y);
+        var height = Random.Range(minRelativeHeight, maxRelativeHeight) * Camera.main.orthographicSize * 2 - Camera.main.orthographicSize;
         bool rightMove = Random.Range(0, 10) % 2 == 0;
 
-        Vector3 pos = rightMove ? leftBottomCorner : rightUpCornerCorner;
-        pos.y = height;
+        var xBallonSize = randomVariant.GetComponent<SpriteRenderer>().bounds.size.x;
+        float leftBorder = -Camera.main.orthographicSize / Screen.height * Screen.width - xBallonSize;
 
-        var balloon = Instantiate(randomVariant, pos, Quaternion.identity, transform);
+        Vector3 pos = new Vector3(rightMove ? leftBorder : -leftBorder, height, 0);
+
+        var balloon = Instantiate(randomVariant, pos, Quaternion.identity);
         balloons.Add(balloon);
 
-        balloon.transform.DOMoveX(rightMove ? rightUpCornerCorner.x : leftBottomCorner.x, Random.Range(minBalloonTimeFly, maxBalloonTimeFly))
-            .OnUpdate(() => { balloon.transform.position = new Vector3(balloon.transform.position.x, height + Mathf.Sin(2 * (balloon.transform.position.x - pos.x)) * 0.5f , balloon.transform.position.z); })
+        balloon.transform.DOMoveX(rightMove ? -leftBorder : leftBorder, Random.Range(minBalloonTimeFly, maxBalloonTimeFly))
+            .OnUpdate(() => { balloon.transform.position = new Vector3(balloon.transform.position.x, height + Mathf.Sin(2 * (balloon.transform.position.x - pos.x)) * 0.5f, balloon.transform.position.z); })
             .OnComplete(() => DestroyBalloon(balloon));
     }
 

@@ -766,6 +766,7 @@ GameObject:
   - component: {fileID: 1220661609}
   - component: {fileID: 1220661608}
   - component: {fileID: 1220661610}
+  - component: {fileID: 1220661611}
   m_Layer: 0
   m_Name: background
   m_TagString: Untagged
@@ -854,12 +855,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minBalloonTimeFly: 4
   maxBalloonTimeFly: 7
-  leftBottomCorner: {x: -3.51, y: -2, z: 0}
-  rightUpCornerCorner: {x: 3.63, y: 4.04, z: 0}
+  minRelativeHeight: 0.2
+  maxRelativeHeight: 0.8
   balloonVariants:
   - {fileID: 8860778149729247972, guid: 13feaf995923a5440bc188a57fff96d7, type: 3}
   - {fileID: 5520459861886237369, guid: dbc29f11d3a3a54468a3ae237f91ff52, type: 3}
   maxBalloonsOnField: 3
+--- !u!114 &1220661611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220661607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2c24b75b55374409c6655ad5dc6608, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1887927849
 GameObject:
   m_ObjectHideFlags: 0
